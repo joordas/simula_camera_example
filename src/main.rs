@@ -45,10 +45,6 @@ fn spawn_scene(
 }
 
 fn setup(mut commands: Commands, mut images: ResMut<Assets<Image>>) {
-    //   commands.spawn(Camera3dBundle {
-    //     transform: Transform::from_xyz(-2.0, 2.5, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
-    //     ..Default::default()
-    // });
     let rt_image = images.add(rt::common_render_target_image(UVec2 { x: 256, y: 256 }));
 
     commands
@@ -69,12 +65,6 @@ fn setup(mut commands: Commands, mut images: ResMut<Assets<Image>>) {
                     target: bevy::render::camera::RenderTarget::Image(rt_image.clone()),
                     ..default()
                 },
-                ..default()
-            });
-
-            #[cfg(feature = "gst")]
-            _child.insert(GstSrc {
-                size: UVec2 { x: 256, y: 256 },
                 ..default()
             });
         })
