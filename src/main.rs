@@ -1,8 +1,14 @@
 use bevy::{core_pipeline::clear_color::ClearColorConfig, prelude::*, render::view::RenderLayers};
-use simula_camera::{flycam::*, orbitcam::*};
-use simula_action::ActionPlugin;
-use simula_video::rt;
 use bevy_egui::EguiPlugin;
+use bevy_inspector_egui::WorldInspectorPlugin;
+use simula_action::ActionPlugin;
+use simula_camera::{flycam::*, orbitcam::*};
+use simula_video::rt;
+
+use simula_viz::{
+    grid::{Grid, GridBundle, GridPlugin},
+    lines::{LineMesh, LinesMaterial, LinesPlugin},
+};
 
 pub const HEIGHT: f32 = 720.0;
 pub const WIDTH: f32 = 1280.0;
@@ -22,10 +28,14 @@ fn main() {
             ..default()
         }))
         .add_plugin(EguiPlugin)
+        .add_plugin(WorldInspectorPlugin::new())
         .add_plugin(ActionPlugin)
         .add_plugin(OrbitCameraPlugin)
         .add_plugin(FlyCameraPlugin)
+        .add_plugin(LinesPlugin)
+        .add_plugin(GridPlugin)
         .add_startup_system(spawn_scene)
+        .add_startup_system(spawn_grid_lines)
         .add_startup_system(setup)
         .run();
 }
@@ -42,6 +52,30 @@ fn spawn_scene(
             ..Default::default()
         })
         .insert(Name::new("Floor"));
+}
+
+fn spawn_grid_lines(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut lines_materials: ResMut<Assets<LinesMaterial>>,
+    line_mesh: Res<LineMesh>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    commands
+        .spawn(GridBundle {
+            grid: Grid {
+                size: 10,
+                divisions: 10,
+                start_color: Color::BLUE,
+                end_color: Color::RED,
+                ..default()
+            },
+            mesh: meshes.add(line_mesh.clone()),
+            material: lines_materials.add(LinesMaterial {}),
+            transform: Transform::from_translation(Vec3::new(0.0, 0.2, 0.0)),
+            ..default()
+        })
+        .insert(Name::new("Grid"));
 }
 
 fn setup(mut commands: Commands, mut images: ResMut<Assets<Image>>) {
